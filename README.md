@@ -1,20 +1,40 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# REPREA: Instrucciones de Despliegue en Netlify
 
-# Run and deploy your AI Studio app
+¡Hola! Has llegado al último paso: publicar tu aplicación para que todo el mundo pueda usarla.
 
-This contains everything you need to run your app locally.
+La gran noticia es que **la carpeta del proyecto ya está lista**. No necesitas compilar ni construir nada. Gracias a la configuración moderna que utilizamos, puedes desplegarla directamente.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1LGKjy37fO1UkdK019sQeQLxnIPc5kk3O
+Sigue estos sencillos pasos para tener tu aplicación online en menos de un minuto.
 
-## Run Locally
+### Pasos para Desplegar con Netlify Drop (Gratis)
 
-**Prerequisites:**  Node.js
+1.  **Prepara la Carpeta para Desplegar:**
+    *   En tu computadora, localiza la carpeta que contiene todos los archivos del proyecto. Debería tener una estructura como esta:
+        ```
+        tu-proyecto/
+        ├── components/
+        │   ├── ... (todos tus componentes)
+        ├── services/
+        │   └── geminiService.ts
+        ├── App.tsx
+        ├── constants.ts
+        ├── index.html
+        ├── index.tsx
+        ├── metadata.json
+        ├── README.md   <-- (Este archivo)
+        └── types.ts
+        ```
 
+2.  **Ve a Netlify Drop:**
+    *   Abre la siguiente URL en tu navegador: [https://app.netlify.com/drop](https://app.netlify.com/drop)
+    *   Si te lo pide, inicia sesión con tu cuenta de GitHub, Google, o crea una cuenta gratuita.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+3.  **Arrastra y Suelta:**
+    *   Verás un área grande que dice "Drag and drop your site folder here".
+    *   **Arrastra la carpeta completa de tu proyecto** (la carpeta `tu-proyecto/` del paso 1) y suéltala directamente en esa área de la página web.
+
+**¡Y listo!**
+
+Netlify subirá tus archivos y en unos segundos te dará una **URL pública y gratuita** (similar a `nombre-aleatorio-genial.netlify.app`). Ya puedes usar esa URL para acceder a tu aplicación desde cualquier dispositivo y compartirla.
+
+No hay un paso de "preparación" o "compilación" porque tu aplicación está diseñada para funcionar así de simple. ¡Disfruta de tu aplicación en vivo!

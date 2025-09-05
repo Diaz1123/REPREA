@@ -1,6 +1,5 @@
-
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
-import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis } from '../types';
+import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
@@ -36,8 +35,9 @@ async function callGenerativeModel<T>(prompt: string, responseSchema: any): Prom
             config: {
                 responseMimeType: 'application/json',
                 responseSchema,
+                // FIX: `safetySettings` must be inside the `config` object.
+                safetySettings,
             },
-            safetySettings,
         });
 
         const jsonText = response.text.trim();
@@ -75,6 +75,43 @@ export const analyzeTextMethodology = async (text: string): Promise<MethodologyA
     return callGenerativeModel<MethodologyAnalysis>(prompt, schema);
 };
 
+export const getExpertReview = async (analysisData: {
+    suggestionsCount: number;
+    avgStructureScore: number;
+    citationIssues: number;
+    methodologyScore: number;
+}): Promise<ExpertReview> => {
+    const prompt = `Eres un editor en jefe de una prestigiosa revista académica con más de 20 años de experiencia. Tu criterio es extremadamente riguroso. Se te ha proporcionado un resumen del análisis automático de un manuscrito. Basado ESTRICTAMENTE en los siguientes datos, debes tomar una decisión final sobre el artículo.
+
+Datos del Análisis:
+- Número de sugerencias de estilo/gramática: ${analysisData.suggestionsCount}
+- Puntuaje promedio de estructura (sobre 100): ${analysisData.avgStructureScore}
+- Número total de problemas de citación: ${analysisData.citationIssues}
+- Puntuaje de coherencia metodológica (sobre 100): ${analysisData.methodologyScore}
+
+Tus criterios de decisión son:
+- **Aceptado sin revisión:** SOLO si todos los indicadores son casi perfectos. Cero sugerencias, puntuaciones > 95. Es extremadamente raro.
+- **Rechazado:** Si el manuscrito muestra fallas fundamentales. Por ejemplo, un alto número de sugerencias (>50), una puntuación de estructura muy baja (< 60), o una puntuación de metodología inaceptable (< 50). Estos son umbrales guía; usa tu juicio experto para evaluar la combinación de factores. Un artículo con mala metodología pero buena redacción podría ser rechazado, y viceversa.
+- **Aceptado para revisión:** Todos los demás casos. El artículo tiene potencial pero requiere revisiones por pares y del autor.
+
+IMPORTANTE:
+1.  Tu respuesta DEBE ser un objeto JSON.
+2.  La clave "decision" debe ser UNA de estas tres cadenas EXACTAS: "Aceptado sin revisión", "Aceptado para revisión", "Rechazado".
+3.  Si la decisión es "Rechazado", DEBES incluir una clave "recommendations" que sea un array de strings. Cada string debe ser una recomendación CONCRETA y CONSTRUCTIVA para que los autores mejoren el manuscrito para un futuro envío. Las recomendaciones deben ser accionables y específicas, basadas en las debilidades que los datos sugieren (ej. "Revisar a fondo la sección de Metodología para asegurar su reproducibilidad", "Realizar una revisión gramatical exhaustiva con un profesional", etc.).
+4.  Si la decisión NO es "Rechazado", la clave "recommendations" debe ser un array vacío [].`;
+
+    const schema = {
+        type: Type.OBJECT,
+        properties: {
+            decision: { type: Type.STRING, enum: ["Aceptado sin revisión", "Aceptado para revisión", "Rechazado"] },
+            recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
+        },
+        required: ["decision", "recommendations"]
+    };
+    return callGenerativeModel<ExpertReview>(prompt, schema);
+};
+
+
 export const changeTextTone = async (text: string, selectedTone: string): Promise<string> => {
     let instruction = '';
     switch (selectedTone) {
@@ -86,6 +123,7 @@ export const changeTextTone = async (text: string, selectedTone: string): Promis
     }
     const prompt = `${instruction}\n\nTexto original:\n---\n${text}\n---\n\nTexto reescrito:`;
     
-    const response = await ai.models.generateContent({ model, contents: prompt, safetySettings });
+    // FIX: `safetySettings` must be inside a `config` object.
+    const response = await ai.models.generateContent({ model, contents: prompt, config: { safetySettings } });
     return response.text;
 };

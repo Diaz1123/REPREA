@@ -1,9 +1,10 @@
-
 // Allow access to globally loaded libraries
 declare global {
   interface Window {
     jspdf: any;
     html2canvas: any;
+    mammoth: any;
+    pdfjsLib: any;
   }
 }
 
@@ -56,9 +57,14 @@ export interface MethodologyAnalysis {
     };
 }
 
+export interface ExpertReview {
+  decision: 'Aceptado sin revisión' | 'Aceptado para revisión' | 'Rechazado';
+  recommendations: string[];
+}
+
 export type AnalysisType = 'corrections' | 'structure' | 'citations' | 'methodology';
 export type LoadingStates = {
-  [key in AnalysisType | 'tone' | 'refGenerator']?: boolean;
+  [key in AnalysisType | 'tone' | 'refGenerator' | 'expertReview']?: boolean;
 };
 
 export interface Category {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sparkles, Loader2, PenLine, LayoutList, BookMarked, Beaker, Award, Download } from 'lucide-react';
 import Card from './ui/Card';
@@ -20,7 +19,7 @@ interface ResultsPanelProps {
   handleAnalyzeStructure: () => void;
   handleAnalyzeCitations: () => void;
   handleAnalyzeMethodology: () => void;
-  setShowResultsDashboard: (show: boolean) => void;
+  handleOpenDashboard: () => void;
   setShowReportModal: (show: boolean) => void;
   analysesCompleted: number;
   
@@ -39,7 +38,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = (props) => {
     const {
         isLoading, text, selectedTone, setSelectedTone, handleChangeTone, handleAnalyzeText,
         handleAnalyzeStructure, handleAnalyzeCitations, handleAnalyzeMethodology,
-        setShowResultsDashboard, setShowReportModal, analysesCompleted,
+        handleOpenDashboard, setShowReportModal, analysesCompleted,
         activeTab, setActiveTab, suggestions, applySuggestion, applyAllSuggestions,
         structuralAnalysis, citationAnalysis, methodologyAnalysis
     } = props;
@@ -86,8 +85,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = (props) => {
                         </div>
                     </div>
                      <div className="pt-4 border-t border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button onClick={() => setShowResultsDashboard(true)} disabled={!allAnalysesDone} className="w-full px-4 py-2 text-md font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                            <Award size={20}/> Resultados
+                        <button onClick={handleOpenDashboard} disabled={!allAnalysesDone || isLoading.expertReview} className="w-full px-4 py-2 text-md font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                            {isLoading.expertReview ? <Loader2 className="w-5 h-5 animate-spin"/> : <Award size={20}/>}
+                            Resultados
                         </button>
                         <button onClick={() => setShowReportModal(true)} disabled={!allAnalysesDone} className="w-full px-4 py-2 text-md font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
                             <Download size={20}/> Descargar

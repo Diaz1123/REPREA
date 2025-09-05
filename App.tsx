@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Sparkles, Sun, Moon } from 'lucide-react';
 
@@ -15,7 +14,8 @@ import {
   analyzeTextStructure, 
   analyzeTextCitations, 
   analyzeTextMethodology,
-  changeTextTone
+  changeTextTone,
+  getExpertReview
 } from './services/geminiService';
 import { SAMPLE_TEXT, CITATION_STYLES } from './constants';
 import type { 
@@ -24,7 +24,8 @@ import type {
   CitationAnalysis, 
   MethodologyAnalysis, 
   LoadingStates,
-  AnalysisType
+  AnalysisType,
+  ExpertReview
 } from './types';
 
 const App: React.FC = () => {
@@ -33,6 +34,7 @@ const App: React.FC = () => {
   const [structuralAnalysis, setStructuralAnalysis] = useState<StructuralAnalysisSection[]>([]);
   const [citationAnalysis, setCitationAnalysis] = useState<CitationAnalysis | null>(null);
   const [methodologyAnalysis, setMethodologyAnalysis] = useState<MethodologyAnalysis | null>(null);
+  const [expertReview, setExpertReview] = useState<ExpertReview | null>(null);
   const [isLoading, setIsLoading] = useState<LoadingStates>({});
   const [selectedTone, setSelectedTone] = useState('academico');
   const [citationStyle, setCitationStyle] = useState('APA');
@@ -43,6 +45,9 @@ const App: React.FC = () => {
   const [showResultsDashboard, setShowResultsDashboard] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [completedAnalyses, setCompletedAnalyses] = useState<Set<AnalysisType>>(new Set());
+  const [isGdocImportVisible, setIsGdocImportVisible] = useState(false);
+  const [gdocUrl, setGdocUrl] = useState('');
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +56,12 @@ const App: React.FC = () => {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
+
+  useEffect(() => {
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+    }
+  }, []);
 
   const setLoadingState = (key: keyof LoadingStates, value: boolean) => {
     setIsLoading(prev => ({ ...prev, [key]: value }));
@@ -77,23 +88,104 @@ const App: React.FC = () => {
         setCitationAnalysis(null);
         setMethodologyAnalysis(null);
         setCompletedAnalyses(new Set());
+        setExpertReview(null);
         setError('');
     }
   }, [updateContent]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && editorRef.current) {
-        setUploadedFileName(file.name);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const fileContent = e.target?.result as string;
-            editorRef.current!.innerHTML = fileContent.split('\n').map(p => `<p>${p || '&nbsp;'}</p>`).join('');
-            updateContent();
-        };
-        reader.readAsText(file);
+    if (!file || !editorRef.current) return;
+
+    setUploadedFileName(file.name);
+    setIsProcessingFile(true);
+    setError('');
+
+    try {
+        let fileContent = '';
+        const fileName = file.name.toLowerCase();
+
+        if (fileName.endsWith('.pdf')) {
+            if (!window.pdfjsLib) throw new Error("La librería PDF.js no está disponible.");
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await window.pdfjsLib.getDocument(arrayBuffer).promise;
+            const numPages = pdf.numPages;
+            const pagesText = [];
+            for (let i = 1; i <= numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                pagesText.push(pageText);
+            }
+            fileContent = pagesText.join('\n\n');
+        } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
+             if (!window.mammoth) throw new Error("La librería Mammoth.js no está disponible.");
+             const arrayBuffer = await file.arrayBuffer();
+             const result = await window.mammoth.extractRawText({ arrayBuffer });
+             fileContent = result.value;
+        } else {
+            fileContent = await file.text();
+        }
+
+        editorRef.current.innerHTML = fileContent.split('\n').map(p => `<p>${p || '&nbsp;'}</p>`).join('');
+        updateContent();
+
+    } catch (err) {
+        setError(`Error procesando el archivo: ${err instanceof Error ? err.message : String(err)}.`);
+        editorRef.current.innerHTML = '';
+        updateContent();
+    } finally {
+        setIsProcessingFile(false);
+        if (event.target) {
+            event.target.value = '';
+        }
     }
   };
+
+  const handleGdocImport = async () => {
+    if (!gdocUrl.trim() || !editorRef.current) {
+        setError('Por favor, ingresa una URL de Google Doc válida.');
+        return;
+    }
+    
+    if (!gdocUrl.includes('docs.google.com/document/d/') || !gdocUrl.endsWith('/pub')) {
+         setError('URL inválida. Asegúrate de que es un enlace "Publicado en la web" que termina en /pub.');
+         return;
+    }
+
+    setIsProcessingFile(true);
+    setError('');
+    setUploadedFileName('Google Doc');
+    
+    try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(gdocUrl)}`;
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error(`Error al acceder a la URL. Código: ${response.status}`);
+        
+        const data = await response.json();
+        const htmlContent = data.contents;
+        
+        if (!htmlContent) throw new Error("No se pudo obtener contenido de la URL.");
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlContent, 'text/html');
+        const contentElement = doc.getElementById('contents');
+        const extractedText = contentElement ? contentElement.innerText : doc.body.innerText;
+        
+        if (!extractedText.trim()) throw new Error("No se pudo extraer texto del documento.");
+
+        editorRef.current.innerHTML = extractedText.split('\n').map(p => `<p>${p || '&nbsp;'}</p>`).join('');
+        updateContent();
+        setIsGdocImportVisible(false);
+        setGdocUrl('');
+
+    } catch (err) {
+        setError(`Error importando Google Doc: ${err instanceof Error ? err.message : String(err)}.`);
+    } finally {
+        setIsProcessingFile(false);
+    }
+  };
+
 
   const triggerFileUpload = () => fileInputRef.current?.click();
 
@@ -108,6 +200,7 @@ const App: React.FC = () => {
     }
     setLoadingState(type, true);
     setError('');
+    setExpertReview(null); // Reset expert review when a new analysis is run
     try {
       const result = await analysisFn();
       stateSetter(result);
@@ -127,6 +220,31 @@ const App: React.FC = () => {
   const handleAnalyzeStructure = () => runAnalysis(() => analyzeTextStructure(text), setStructuralAnalysis, 'structure');
   const handleAnalyzeCitations = () => runAnalysis(() => analyzeTextCitations(text, citationStyle), setCitationAnalysis, 'citations');
   const handleAnalyzeMethodology = () => runAnalysis(() => analyzeTextMethodology(text), setMethodologyAnalysis, 'methodology');
+
+  const handleOpenDashboard = async () => {
+    setLoadingState('expertReview', true);
+    setError('');
+    try {
+      const avgStructureScore = structuralAnalysis.length > 0
+        ? Math.round(structuralAnalysis.reduce((acc, s) => acc + s.section_score, 0) / structuralAnalysis.length)
+        : 0;
+      const citationIssues = citationAnalysis ? citationAnalysis.formatting_errors.length + citationAnalysis.missing_references.length + citationAnalysis.uncited_references.length : 0;
+      const methodologyScore = methodologyAnalysis?.puntaje_general || 0;
+
+      const review = await getExpertReview({
+        suggestionsCount: suggestions.length,
+        avgStructureScore,
+        citationIssues,
+        methodologyScore
+      });
+      setExpertReview(review);
+      setShowResultsDashboard(true);
+    } catch(err) {
+      setError(`No se pudo obtener el veredicto del editor: ${err instanceof Error ? err.message : String(err)}.`);
+    } finally {
+      setLoadingState('expertReview', false);
+    }
+  };
 
   const handleChangeTone = async () => {
     if (!text.trim()) return;
@@ -291,6 +409,12 @@ const App: React.FC = () => {
             onFileUpload={handleFileChange}
             triggerFileUpload={triggerFileUpload}
             fileInputRef={fileInputRef}
+            isGdocImportVisible={isGdocImportVisible}
+            setIsGdocImportVisible={setIsGdocImportVisible}
+            gdocUrl={gdocUrl}
+            setGdocUrl={setGdocUrl}
+            handleGdocImport={handleGdocImport}
+            isProcessingFile={isProcessingFile}
           />
           <ResultsPanel
             isLoading={isLoading}
@@ -302,7 +426,7 @@ const App: React.FC = () => {
             handleAnalyzeStructure={handleAnalyzeStructure}
             handleAnalyzeCitations={handleAnalyzeCitations}
             handleAnalyzeMethodology={handleAnalyzeMethodology}
-            setShowResultsDashboard={setShowResultsDashboard}
+            handleOpenDashboard={handleOpenDashboard}
             setShowReportModal={setShowReportModal}
             analysesCompleted={completedAnalyses.size}
             activeTab={activeTab}
@@ -322,6 +446,7 @@ const App: React.FC = () => {
                 structuralAnalysis={structuralAnalysis}
                 citationAnalysis={citationAnalysis}
                 methodologyAnalysis={methodologyAnalysis}
+                expertReview={expertReview}
             />}
         {showReportModal && 
             <ReportModal 
