@@ -1,0 +1,6 @@
+{
+  "name": "REPREA: Revisión Preliminar Asistida",
+  "description": "Una aplicación web inteligente para analizar, corregir y mejorar textos académicos utilizando IA. Proporciona análisis de estilo, estructura, citas y metodología para elevar la calidad de la investigación.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
