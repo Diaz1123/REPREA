@@ -1,9 +1,9 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types';
 
-// FIX: Removed strict check for API_KEY which was crashing the app on startup.
-// The SDK will handle the missing key gracefully when an API call is made.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// FIX: Safely access process.env to prevent "process is not defined" crash in browser environments.
+const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
+const ai = new GoogleGenAI({ apiKey });
 
 // FIX: Updated to the recommended model.
 const model = "gemini-2.5-flash";
