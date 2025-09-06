@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>REPREA - Asistente de Redacción Científica</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Babel for on-the-fly TSX transpilation (required for no-build-step deployment) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.9/mammoth.browser.min.js"></script>
@@ -24,6 +26,6 @@
 </head>
 <body class="antialiased">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="text/babel" data-presets="react,typescript" src="/index.tsx"></script>
 </body>
 </html>
