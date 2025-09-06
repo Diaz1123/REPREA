@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
-import { Suggestion, Category } from '../../types';
-import { CATEGORIES } from '../../constants';
+import { Suggestion, Category } from '../../types.ts';
+import { CATEGORIES } from '../../constants.ts';
 
 interface CorrectionsTabProps {
     suggestions: Suggestion[];

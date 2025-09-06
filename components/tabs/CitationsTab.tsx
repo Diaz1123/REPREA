@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CitationAnalysis } from '../../types';
+import { CitationAnalysis } from '../../types.ts';
 import { AlertTriangle, BookCopy, Link2Off } from 'lucide-react';
 
 interface CitationsTabProps {

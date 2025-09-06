@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Sparkles, Sun, Moon } from 'lucide-react';
 
-import EditorPanel from './components/EditorPanel';
-import ResultsPanel from './components/ResultsPanel';
-import ResultsDashboard from './components/modals/ResultsDashboard';
-import ReportModal from './components/modals/ReportModal';
-import StructureTab from './components/tabs/StructureTab';
-import CitationsTab from './components/tabs/CitationsTab';
-import MethodologyTab from './components/tabs/MethodologyTab';
+import EditorPanel from './components/EditorPanel.tsx';
+import ResultsPanel from './components/ResultsPanel.tsx';
+import ResultsDashboard from './components/modals/ResultsDashboard.tsx';
+import ReportModal from './components/modals/ReportModal.tsx';
+import StructureTab from './components/tabs/StructureTab.tsx';
+import CitationsTab from './components/tabs/CitationsTab.tsx';
+import MethodologyTab from './components/tabs/MethodologyTab.tsx';
 
 import { 
   analyzeTextForSuggestions, 
@@ -16,8 +16,8 @@ import {
   analyzeTextMethodology,
   changeTextTone,
   getExpertReview
-} from './services/geminiService';
-import { SAMPLE_TEXT, CITATION_STYLES } from './constants';
+} from './services/geminiService.ts';
+import { SAMPLE_TEXT, CITATION_STYLES } from './constants.ts';
 import type { 
   Suggestion, 
   StructuralAnalysisSection, 
@@ -26,7 +26,7 @@ import type {
   LoadingStates,
   AnalysisType,
   ExpertReview
-} from './types';
+} from './types.ts';
 
 const App: React.FC = () => {
   const [text, setText] = useState('');

@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
-import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types';
+import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types.ts';
 
 let ai: GoogleGenAI | null = null;
 

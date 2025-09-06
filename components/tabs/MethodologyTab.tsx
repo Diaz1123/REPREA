@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { MethodologyAnalysis } from '../../types';
-import ScoreGauge from '../ui/ScoreGauge';
-import ProgressBar from '../ui/ProgressBar';
+import { MethodologyAnalysis } from '../../types.ts';
+import ScoreGauge from '../ui/ScoreGauge.tsx';
+import ProgressBar from '../ui/ProgressBar.tsx';
 import { Check, X, ShieldAlert, ShieldX } from 'lucide-react';
 
 interface MethodologyTabProps {

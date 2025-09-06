@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { StructuralAnalysisSection } from '../../types';
-import ProgressBar from '../ui/ProgressBar';
-import ChecklistIcon from '../ui/ChecklistIcon';
+import { StructuralAnalysisSection } from '../../types.ts';
+import ProgressBar from '../ui/ProgressBar.tsx';
+import ChecklistIcon from '../ui/ChecklistIcon.tsx';
 
 interface StructureTabProps {
     analysis: StructuralAnalysisSection[];

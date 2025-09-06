@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Award, FileCheck, FileX2, ListChecks, BrainCircuit, Activity, BookOpenCheck, ClipboardList } from 'lucide-react';
-import { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../../types';
+import { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../../types.ts';
 
 interface ResultsDashboardProps {
     onClose: () => void;

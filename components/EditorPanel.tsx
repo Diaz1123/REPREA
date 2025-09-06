@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { FileText, UploadCloud, FileJson2 } from 'lucide-react';
-import Card from './ui/Card';
+import Card from './ui/Card.tsx';
 
 interface EditorPanelProps {
     editorRef: React.RefObject<HTMLDivElement>;

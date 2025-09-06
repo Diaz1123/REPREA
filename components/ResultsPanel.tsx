@@ -1,13 +1,13 @@
 import React from 'react';
 import { Sparkles, Loader2, PenLine, LayoutList, BookMarked, Beaker, Award, Download } from 'lucide-react';
-import Card from './ui/Card';
-import { TONES } from '../constants';
-import type { LoadingStates, Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis } from '../types';
+import Card from './ui/Card.tsx';
+import { TONES } from '../constants.ts';
+import type { LoadingStates, Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis } from '../types.ts';
 
-import CorrectionsTab from './tabs/CorrectionsTab';
-import StructureTab from './tabs/StructureTab';
-import CitationsTab from './tabs/CitationsTab';
-import MethodologyTab from './tabs/MethodologyTab';
+import CorrectionsTab from './tabs/CorrectionsTab.tsx';
+import StructureTab from './tabs/StructureTab.tsx';
+import CitationsTab from './tabs/CitationsTab.tsx';
+import MethodologyTab from './tabs/MethodologyTab.tsx';
 
 interface ResultsPanelProps {
   isLoading: LoadingStates;
