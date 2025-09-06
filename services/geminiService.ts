@@ -1,11 +1,24 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types';
 
-// FIX: Safely access process.env to prevent "process is not defined" crash in browser environments.
-const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
-const ai = new GoogleGenAI({ apiKey });
+let ai: GoogleGenAI | null = null;
 
-// FIX: Updated to the recommended model.
+function getAiClient(): GoogleGenAI {
+    if (ai) {
+        return ai;
+    }
+    
+    // Safely access environment variables without crashing the browser.
+    const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
+
+    if (!apiKey) {
+        throw new Error("API Key no encontrada. Asegúrate de que la variable de entorno API_KEY esté configurada en tu proveedor de hosting (ej. Netlify) y vuelve a desplegar el sitio.");
+    }
+
+    ai = new GoogleGenAI({ apiKey });
+    return ai;
+}
+
 const model = "gemini-2.5-flash";
 
 const safetySettings = [
@@ -29,13 +42,13 @@ const safetySettings = [
 
 async function callGenerativeModel<T>(prompt: string, responseSchema: any): Promise<T> {
     try {
-        const response = await ai.models.generateContent({
+        const generativeAI = getAiClient();
+        const response = await generativeAI.models.generateContent({
             model,
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
                 responseSchema,
-                // FIX: `safetySettings` must be inside the `config` object.
                 safetySettings,
             },
         });
@@ -123,7 +136,7 @@ export const changeTextTone = async (text: string, selectedTone: string): Promis
     }
     const prompt = `${instruction}\n\nTexto original:\n---\n${text}\n---\n\nTexto reescrito:`;
     
-    // FIX: `safetySettings` must be inside a `config` object.
-    const response = await ai.models.generateContent({ model, contents: prompt, config: { safetySettings } });
+    const generativeAI = getAiClient();
+    const response = await generativeAI.models.generateContent({ model, contents: prompt, config: { safetySettings } });
     return response.text;
 };
