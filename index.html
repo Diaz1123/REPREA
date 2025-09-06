@@ -5,6 +5,14 @@
     <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a855f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M12 3L9.5 8.5L4 11L9.5 13.5L12 19L14.5 13.5L20 11L14.5 8.5Z'/%3e%3c/svg%3e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>REPREA - Asistente de Redacción Científica</title>
+    
+    <!-- Polyfill for process.env to prevent startup crash in browser -->
+    <script>
+      if (typeof process === 'undefined') {
+        window.process = { env: {} };
+      }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Babel for on-the-fly TSX transpilation (required for no-build-step deployment) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -18,7 +26,7 @@
     "react-dom/": "https://esm.sh/react-dom@18.2.0/",
     "react/": "https://esm.sh/react@18.2.0/",
     "react": "https://esm.sh/react@18.2.0",
-    "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+    "@google/genai": "https://esm.run/@google/genai@0.14.0",
     "lucide-react": "https://esm.sh/lucide-react@0.525.0"
   }
 }

@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
+import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/ai-sdk/google";
 import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types';
 
 let ai: GoogleGenAI | null = null;
@@ -8,8 +8,9 @@ function getAiClient(): GoogleGenAI {
         return ai;
     }
     
-    // Safely access environment variables without crashing the browser.
-    const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
+    // This will no longer crash thanks to the polyfill in index.html.
+    // It will safely be `undefined` if not set on the hosting provider.
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
         throw new Error("API Key no encontrada. Asegúrate de que la variable de entorno API_KEY esté configurada en tu proveedor de hosting (ej. Netlify) y vuelve a desplegar el sitio.");
