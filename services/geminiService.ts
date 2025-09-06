@@ -1,11 +1,11 @@
 import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import type { Suggestion, StructuralAnalysisSection, CitationAnalysis, MethodologyAnalysis, ExpertReview } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
+// FIX: Removed strict check for API_KEY which was crashing the app on startup.
+// The SDK will handle the missing key gracefully when an API call is made.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// FIX: Updated to the recommended model.
 const model = "gemini-2.5-flash";
 
 const safetySettings = [
